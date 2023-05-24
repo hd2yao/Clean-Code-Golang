@@ -95,27 +95,28 @@ Listing 3-2 HtmlUtil.java (refactored)
 
 > 代码清单 3-2 HtmlUtil.java（重构之后）
 
-```java
-public static String renderPageWithSetupsAndTeardowns(
-  PageData pageData, boolean isSuite
-) throws Exception {
-  boolean isTestPage = pageData.hasAttribute("Test");
-  if (isTestPage) {
-    WikiPage testPage = pageData.getWikiPage();
-    StringBuffer newPageContent = new StringBuffer();
-    includeSetupPages(testPage, newPageContent, isSuite);
-    newPageContent.append(pageData.getContent());
-    includeTeardownPages(testPage, newPageContent, isSuite);
-    pageData.setContent(newPageContent.toString());
-  }
+```go
+func renderPageWithSetupsAndTeardowns(pageData PageData, isSuite bool) (string, error) {
+    isTestPage := pageData.hasAttribute("Test")
 
-  return pageData.getHtml();
+    if isTestPage {
+        testPage := pageData.getWikiPage()
+        var newPageContent strings.Builder
+
+        includeSetupPages(testPage, &newPageContent, isSuite)
+        newPageContent.WriteString(pageData.getContent())
+        includeTeardownPages(testPage, &newPageContent, isSuite)
+
+        pageData.setContent(newPageContent.String())
+    }
+
+    return pageData.getHtml(), nil
 }
 ```
 
-Unless you are a student of FitNesse, you probably don’t understand all the details. Still, you probably understand that this function performs the inclusion of some setup and teardown pages into a test page and then renders that page into HTML. If you are familiar with JUnit,2 you probably realize that this function belongs to some kind of Web-based testing framework. And, of course, that is correct. Divining that information from Listing 3-2 is pretty easy, but it’s pretty well obscured by Listing 3-1.
+Unless you are a student of FitNesse, you probably don’t understand all the details. Still, you probably understand that this function performs the inclusion of some setup and teardown pages into a test page and then renders that page into HTML. Divining that information from Listing 3-2 is pretty easy, but it’s pretty well obscured by Listing 3-1.
 
-> 除非你正在研究 FitNesse，否则就理解不了所有细节。不过，你大概能明白，该函数包含把一些设置和拆解页放入一个测试页面，再渲染为 HTML 的操作。如果你熟悉 JUnit[2]，或许会想到，该函数归属于某个基于 Web 的测试框架。而且，这当然没错。从代码清单 3-2 中获得信息很容易，而代码清单 3-1 则晦涩难明。
+> 除非你正在研究 FitNesse，否则就理解不了所有细节。不过，你大概能明白，该函数包含把一些设置和拆解页放入一个测试页面，再渲染为 HTML 的操作。从代码清单 3-2 中获得信息很容易，而代码清单 3-1 则晦涩难明。
 
 2. An open-source unit-testing tool for Java. www.junit.org
 
@@ -135,27 +136,7 @@ In the eighties we used to say that a function should be no bigger than a screen
 
 How short should a function be? In 1999 I went to visit Kent Beck at his home in Oregon. We sat down and did some programming together. At one point he showed me a cute little Java/Swing program that he called Sparkle. It produced a visual effect on the screen very similar to the magic wand of the fairy godmother in the movie Cinderella. As you moved the mouse, the sparkles would drip from the cursor with a satisfying scintillation, falling to the bottom of the window through a simulated gravitational field. When Kent showed me the code, I was struck by how small all the functions were. I was used to functions in Swing programs that took up miles of vertical space. Every function in this program was just two, or three, or four lines long. Each was transparently obvious. Each told a story. And each led you to the next in a compelling order. That’s how short your functions should be!3
 
-> 函数到底该有多长？1991 年，我去 Kent Beck 位于奥勒冈州（Oregon）的家中拜访。我们坐到一起写了些代码。他给我看一个叫做 Sparkle（火花闪耀）的有趣的 Java/Swing 小程序。程序在屏幕上描画电影 Cinderella（《灰姑娘》）中仙女用魔棒造出的那种视觉效果。只要移动鼠标，光标所在处就会爆发出一团令人欣喜的火花，沿着模拟重力场划落到窗口底部。肯特给我看代码的时候，我惊讶于其中那些函数尺寸之小。我看惯了 Swing 程序中长度数以里计的函数。但这个程序中每个函数都只有两行、三行或四行长。每个函数都一目了然。每个函数都只说一件事。而且，每个函数都依序把你带到下一个函数。这就是函数应该达到的短小程度！[3]
-
-3. I asked Kent whether he still had a copy, but he was unable to find one. I searched all my old computers too, but to no avail. All that is left now is my memory of that program.
-
-How short should your functions be? They should usually be shorter than Listing 3-2! Indeed, Listing 3-2 should really be shortened to Listing 3-3.
-
-> 函数应该有多短小？通常来说，应该短于代码清单 3-2 中的函数！代码清单 3-2 实在应该缩短成代码清单 3-3 这个样子。
-
-Listing 3-3 HtmlUtil.java (re-refactored)
-
-> 代码清单 3-3 HtmlUtil.java（再次重构之后）
-
-```java
-public static String renderPageWith
-    SetupsAndTeardowns(
-PageData pageData, boolean isSuite) throws Exception {
-  if (isTestPage(pageData))
-    includeSetupAndTeardownPages(pageData, isSuite);
-  return pageData.getHtml();
-}
-```
+> 函数到底该有多长？1991 年，我去 Kent Beck 位于奥勒冈州（Oregon）的家中拜访。我们坐到一起写了些代码。他给我看一个叫做 Sparkle（火花闪耀）的有趣的 Java/Swing 小程序。程序在屏幕上描画电影 Cinderella（《灰姑娘》）中仙女用魔棒造出的那种视觉效果。只要移动鼠标，光标所在处就会爆发出一团令人欣喜的火花，沿着模拟重力场划落到窗口底部。肯特给我看代码的时候，我惊讶于其中那些函数尺寸之小。我看惯了 Swing 程序中长度数以里计的函数。但这个程序中每个函数都只有两行、三行或四行长。每个函数都一目了然。每个函数都只说一件事。而且，每个函数都依序把你带到下一个函数。
 
 ### Blocks and Indenting 代码块和缩进
 
@@ -311,16 +292,16 @@ b. http://www.objectmentor.com/resources/articles/srp.pdf
 
 b. http://www.objectmentor.com/resources/articles/ocp.pdf
 
-```java
-isPayday(Employee e, Date date),
+```go
+isPayday(e Employee, date Date),
 ```
 
 or
 
 > 或
 
-```java
-deliverPay(Employee e, Money pay),
+```go
+deliverPay(e Employee, pay Money),
 ```
 
 or a host of others. All of which would have the same deleterious structure.
