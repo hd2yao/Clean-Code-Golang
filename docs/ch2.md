@@ -496,79 +496,77 @@ Listing 2-1 Variables with unclear context.
 
 > 代码清单 2-1 语境不明确的变量
 
-```java
-private void printGuessStatistics(char candidate, int count) {
-  String number;
-  String verb;
-  String pluralModifier;
-  if (count == 0) {
-    number = ”no”;
-    verb = ”are”;
-    pluralModifier = ”s”;
-  } else if (count == 1) {
-    number = ”1”;
-    verb = ”is”;
-    pluralModifier = ””;
-  } else {
-    number = Integer.toString(count);
-    verb = ”are”;
-    pluralModifier = ”s”;
-  }
-  String guessMessage = String.format(
-    ”There %s %s %s%s”, verb, number, candidate, pluralModifier
-  );
-  print(guessMessage);
+```go
+func printGuessStatistics(candidate rune, count int) {
+    var number string
+    var verb string
+    var pluralModifier string
+
+    if count == 0 {
+        number = "no"
+        verb = "are"
+        pluralModifier = "s"
+    } else if count == 1 {
+        number = "1"
+        verb = "is"
+        pluralModifier = ""
+    } else {
+        number = strconv.Itoa(count)
+        verb = "are"
+        pluralModifier = "s"
+    }
+
+    guessMessage := fmt.Sprintf("There %s %s %c%s", verb, number, candidate, pluralModifier)
+    fmt.Println(guessMessage)
 }
 ```
 
 The function is a bit too long and the variables are used throughout. To split the function into smaller pieces we need to create a GuessStatisticsMessage class and make the three variables fields of this class. This provides a clear context for the three variables. They are definitively part of the GuessStatisticsMessage. The improvement of context also allows the algorithm to be made much cleaner by breaking it into many smaller functions. (See Listing 2-2.)
 
-> 上列函数有点儿过长，变量的使用贯穿始终。要分解这个函数，需要创建一个名为 GuessStatisticsMessage 的类，把三个变量做成该类的成员字段。这样它们就在定义上变作了 GuessStatisticsMessage 的一部分。语境的增强也让算法能够通过分解为更小的函数而变得更为干净利落。
+> 上列函数有点儿过长，变量的使用贯穿始终。要分解这个函数，需要创建一个名为 GuessStatisticsMessage 的结构体，把三个变量做成该类的成员字段。这样它们就在定义上变作了 GuessStatisticsMessage 的一部分。语境的增强也让算法能够通过分解为更小的函数而变得更为干净利落。
 
 Listing 2-2 Variables have a context.
 
 > （如代码清单 2-2 所示。）代码清单
 
-```java
-public class GuessStatisticsMessage {
-  private String number;
-  private String verb;
-  private String pluralModifier;
+```go
+type GuessStatisticsMessage struct {
+	number         string
+	verb           string
+	pluralModifier string
+}
 
-  public String make(char candidate, int count) {
-    createPluralDependentMessageParts(count);
-    return String.format(
-      "There %s %s %s%s",
-      verb, number, candidate, pluralModifier );
-  }
+func (g *GuessStatisticsMessage) make(candidate rune, count int) string {
+	g.createPluralDependentMessageParts(count)
+	return fmt.Sprintf("There %s %s %c%s", g.verb, g.number, candidate, g.pluralModifier)
+}
 
-  private void createPluralDependentMessageParts(int count) {
-    if (count == 0) {
-      thereAreNoLetters();
-    } else if (count == 1) {
-      thereIsOneLetter();
-    } else {
-      thereAreManyLetters(count);
-    }
-  }
+func (g *GuessStatisticsMessage) createPluralDependentMessageParts(count int) {
+	if count == 0 {
+		g.thereAreNoLetters()
+	} else if count == 1 {
+		g.thereIsOneLetter()
+	} else {
+		g.thereAreManyLetters(count)
+	}
+}
 
-  private void thereAreManyLetters(int count) {
-    number = Integer.toString(count);
-    verb = "are";
-    pluralModifier = "s";
-  }
+func (g *GuessStatisticsMessage) thereAreManyLetters(count int) {
+	g.number = strconv.Itoa(count)
+	g.verb = "are"
+	g.pluralModifier = "s"
+}
 
-  private void thereIsOneLetter() {
-    number = "1";
-    verb = "is";
-    pluralModifier = "";
-  }
+func (g *GuessStatisticsMessage) thereIsOneLetter() {
+	g.number = "1"
+	g.verb = "is"
+	g.pluralModifier = ""
+}
 
-  private void thereAreNoLetters() {
-    number = "no";
-    verb = "are";
-    pluralModifier = "s";
-  }
+func (g *GuessStatisticsMessage) thereAreNoLetters() {
+	g.number = "no"
+	g.verb = "are"
+	g.pluralModifier = "s"
 }
 ```
 
