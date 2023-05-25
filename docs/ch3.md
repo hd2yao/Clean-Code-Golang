@@ -555,7 +555,7 @@ Arguments are most naturally interpreted as inputs to a function. If you have be
 
 > 参数多数会被自然而然地看作是函数的输入。如果你编过好些年程序，我担保你一定被用作输出而非输入的参数迷惑过。例如：
 
-```java
+```go
 appendFooter(s);
 ```
 
